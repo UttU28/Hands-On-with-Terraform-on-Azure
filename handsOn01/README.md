@@ -1,4 +1,4 @@
-# Deploy to Azure Using the Terraform Command Line Interface (CLI)
+# **Deploy to Azure Using the Terraform Command Line Interface (CLI)**
 
 * Initialize the terraform using ```terraform init``` after assigning the **PROVIDER**
 * You already have a Resource Group in your Azure Account
