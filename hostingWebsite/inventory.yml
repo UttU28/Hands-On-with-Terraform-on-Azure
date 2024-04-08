@@ -1,0 +1,7 @@
+[storage]
+storageportfolio2 ansible_connection=local
+
+[storage:vars]
+storage_account_name=storageportfolio2
+storage_container_name=
+EOF
