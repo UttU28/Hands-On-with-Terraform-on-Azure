@@ -1,3 +1,12 @@
+locals {
+  content_type_map = {
+    "js"   = "application/json"
+    "html" = "text/html"
+    "css"  = "text/css"
+  }
+
+  default_content_type = "text/css"
+}
 
 resource "azurerm_storage_account" "storageAccount" {
   name                = "storageportfolio2"
@@ -15,28 +24,62 @@ resource "azurerm_storage_account" "storageAccount" {
   }
 }
 
-resource "azurerm_storage_blob" "storageBlob" {
-  name                   = "index.html"
+resource "azurerm_storage_blob" "uploadFilesHTML" {
+  for_each = fileset("${path.module}/Portfolio", "*.html")
+
+  name                   = "${each.value}"
   storage_account_name   = azurerm_storage_account.storageAccount.name
   storage_container_name = "$web"
   type                   = "Block"
+  source                 = "${path.module}/Portfolio/${each.value}"
   content_type           = "text/html"
-  source                 = "index.html"
+  depends_on = [azurerm_storage_account.storageAccount]
 }
 
-resource "null_resource" "generateInventory" {
-  provisioner "local-exec" {
-    command = <<EOT
-cat << EOF > inventory.yml
+resource "azurerm_storage_blob" "uploadFilesCSS" {
+  for_each = fileset("${path.module}/Portfolio", "*.css")
 
-[storage]
-${azurerm_storage_account.storageAccount.name} ansible_connection=local
+  name                   = "${each.value}"
+  storage_account_name   = azurerm_storage_account.storageAccount.name
+  storage_container_name = "$web"
+  type                   = "Block"
+  source                 = "${path.module}/Portfolio/${each.value}"
+  content_type           = "text/css"
+  depends_on = [azurerm_storage_account.storageAccount]
+}
 
-[storage:vars]
-storage_account_name= ${azurerm_storage_account.storageAccount.name}
-storage_container_name= ${azurerm_storage_blob.storageBlob.storage_container_name}
+resource "azurerm_storage_blob" "uploadFilesJS" {
+  for_each = fileset("${path.module}/Portfolio", "*.js")
 
-EOF
-EOT
-  }
+  name                   = "${each.value}"
+  storage_account_name   = azurerm_storage_account.storageAccount.name
+  storage_container_name = "$web"
+  type                   = "Block"
+  source                 = "${path.module}/Portfolio/${each.value}"
+  content_type           = "text/js"
+  depends_on = [azurerm_storage_account.storageAccount]
+}
+
+resource "azurerm_storage_blob" "uploadFilesTTF" {
+  for_each = fileset("${path.module}/Portfolio/Fonts", "*.ttf")
+
+  name                   = "${each.value}"
+  storage_account_name   = azurerm_storage_account.storageAccount.name
+  storage_container_name = "$web"
+  type                   = "Block"
+  source                 = "${path.module}/Portfolio/Fonts/${each.value}"
+  content_type           = "application/x-font-truetype"
+  depends_on = [azurerm_storage_account.storageAccount]
+}
+
+resource "azurerm_storage_blob" "uploadFilesPNG" {
+  for_each = fileset("${path.module}/Portfolio", "*.png")
+
+  name                   = "${each.value}"
+  storage_account_name   = azurerm_storage_account.storageAccount.name
+  storage_container_name = "$web"
+  type                   = "Block"
+  source                 = "${path.module}/Portfolio/${each.value}"
+  content_type           = "image/png"
+  depends_on = [azurerm_storage_account.storageAccount]
 }
