@@ -1,28 +1,3 @@
-locals {
-  content_type_map = {
-    "js"   = "application/json"
-    "html" = "text/html"
-    "css"  = "text/css"
-  }
-
-  default_content_type = "text/css"
-}
-
-resource "azurerm_storage_account" "storageAccount" {
-  name                = "storageportfolio2"
-  resource_group_name = azurerm_resource_group.resourceGroup.name
-  location            = azurerm_resource_group.resourceGroup.location
-
-  account_tier             = "Standard"
-  account_replication_type = "LRS"
-  account_kind             = "StorageV2"
-
-  enable_https_traffic_only = true
-
-  static_website {
-    index_document = "index.html"
-  }
-}
 
 resource "azurerm_storage_blob" "uploadFilesHTML" {
   for_each = fileset("${path.module}/Portfolio", "*.html")
@@ -61,13 +36,13 @@ resource "azurerm_storage_blob" "uploadFilesJS" {
 }
 
 resource "azurerm_storage_blob" "uploadFilesTTF" {
-  for_each = fileset("${path.module}/Portfolio/Fonts", "*.ttf")
+  for_each = fileset("${path.module}/Portfolio", "*.ttf")
 
   name                   = "${each.value}"
   storage_account_name   = azurerm_storage_account.storageAccount.name
   storage_container_name = "$web"
   type                   = "Block"
-  source                 = "${path.module}/Portfolio/Fonts/${each.value}"
+  source                 = "${path.module}/Portfolio/${each.value}"
   content_type           = "application/x-font-truetype"
   depends_on = [azurerm_storage_account.storageAccount]
 }
